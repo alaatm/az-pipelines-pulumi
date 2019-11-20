@@ -110,6 +110,7 @@ jobs:
     displayName: 'Deploy WebApp'
     inputs:
       azureSubscription: 'VS-PRO-AZURE(509ae91c-1e41-451e-84fa-dd82d7696b67)'
+      appType: 'webApp'
       appName: $(appName)
       package: $(System.ArtifactsDirectory)/web/**/*.zip
       
@@ -117,5 +118,6 @@ jobs:
     displayName: 'Deploy FuncApp'
     inputs:
       azureSubscription: 'VS-PRO-AZURE(509ae91c-1e41-451e-84fa-dd82d7696b67)'
+      appType: 'functionApp'
       appName: $(funcName)
       package: $(System.ArtifactsDirectory)/func/**/*.zip
