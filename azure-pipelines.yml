@@ -12,7 +12,7 @@ jobs:
     displayName: 'Pulumi Preview'
     condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))
     inputs:
-      azureSubscription: 'Azure Resource Manager'
+      azureSubscription: 'VS-PRO-AZURE(509ae91c-1e41-451e-84fa-dd82d7696b67)'
       command: 'preview'
       cwd: 'infra/'
       stack: 'alaatm/az-pipelines/dev'
@@ -21,7 +21,7 @@ jobs:
     displayName: 'Pulumi Update'
     condition: or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'BatchedCI'))
     inputs:
-      azureSubscription: 'Azure Resource Manager'
+      azureSubscription: 'VS-PRO-AZURE(509ae91c-1e41-451e-84fa-dd82d7696b67)'
       command: 'up'
       cwd: 'infra/'
       stack: 'alaatm/az-pipelines/dev'

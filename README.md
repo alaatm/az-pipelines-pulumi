@@ -52,8 +52,11 @@
 
     In the created pipeline add a new variable called `PULUMI_ACCESS_TOKEN` to set your [pulumi access token](https://app.pulumi.com/alaatm/settings/tokens).
 
+1. Install [Pulumi Azure Pipelines extension](https://marketplace.visualstudio.com/items?itemName=pulumi.build-and-release-task) from the marketplace.
+
 1. Add `azure-pipelines.yml`, see the one in the root of this repo for reference.
 
+1. Make sure you authorize the azure service connection. You can do that via the settings of the Pulumi task in the pipeline editor in Azure DevOps.
 
 ### Resources
 
