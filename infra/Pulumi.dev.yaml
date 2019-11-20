@@ -1,0 +1,6 @@
+config:
+  az-pipelines:sqlPassword:
+    secure: AAABAMQM+u4sIbm0biycEPHhtQH5olKw4WmeDTHXoHcTYesLVJuPwRk=
+  az-pipelines:sqlUsername:
+    secure: AAABAIQKzmFAM7BCW8NOWmuu47gP70S+ujqJY80onqjkbzVO
+  azure:location: West Europe

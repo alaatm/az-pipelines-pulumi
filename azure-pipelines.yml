@@ -1,0 +1,121 @@
+variables:
+  BuildConfiguration: Release
+
+jobs:
+# Preview infra changes on PR
+# Update infra changes on commit
+- job: infrastructure
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: Pulumi@1
+    displayName: 'Pulumi Preview'
+    condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))
+    inputs:
+      azureSubscription: 'Azure Resource Manager'
+      command: 'preview'
+      cwd: 'infra/'
+      stack: 'alaatm/az-pipelines/dev'
+
+  - task: Pulumi@1
+    displayName: 'Pulumi Update'
+    condition: or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'BatchedCI'))
+    inputs:
+      azureSubscription: 'Azure Resource Manager'
+      command: 'up'
+      cwd: 'infra/'
+      stack: 'alaatm/az-pipelines/dev'
+      args: '--yes'
+  - script: |
+      echo "##vso[task.setvariable variable=appName;isOutput=true]$(pulumi stack output appName)"
+      echo "##vso[task.setvariable variable=funcName;isOutput=true]$(pulumi stack output funcName)"
+    workingDirectory: 'infra/'
+    displayName: 'Set stack outputs as variables'
+    name: 'pulumi'
+
+# Build on PR
+- job: build
+  condition: eq(variables['Build.Reason'], 'PullRequest')
+  steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore Nugets'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Project'
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '--configuration $(BuildConfiguration)'
+
+# Build and deploy on commit
+- job: build_and_deploy
+  condition: and(ne(variables['Build.Reason'], 'PullRequest'), ne(dependencies.infrastructure.outputs['pulumi.appName'], ''))
+  dependsOn: infrastructure
+  variables:
+    appName: $[ dependencies.infrastructure.outputs['pulumi.appName'] ]
+    funcName: $[ dependencies.infrastructure.outputs['pulumi.funcName'] ]
+  steps:
+#  - task: UseDotNet@2
+#    displayName: 'Install .NET Core SDK'
+#    inputs:
+#      version: '3.1.100-preview3-014645'
+#      includePreviewVersions: true
+#      performMultiLevelLookup: true
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore Nugets'
+    inputs:
+      command: 'restore'
+      projects: '**/*.csproj'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Build Project'
+    inputs:
+      command: 'build'
+      projects: '**/*.csproj'
+      arguments: '--configuration $(BuildConfiguration)'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish WebApp'
+    inputs:
+      publishWebProjects: False
+      command: publish
+      projects: './src/App/App.csproj'
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/web'
+      zipAfterPublish: True
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish FuncApp'
+    inputs:
+      publishWebProjects: False
+      command: publish
+      projects: './src/Funcs/Funcs.csproj'
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/func'
+      zipAfterPublish: True
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish WebApp Artifacts'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)/web' 
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish FuncApp Artifacts'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)/func' 
+
+  - task: AzureWebApp@1
+    displayName: 'Deploy WebApp'
+    inputs:
+      azureSubscription: 'Azure Resource Manager'
+      appName: $(appName)
+      package: $(System.ArtifactsDirectory)/web/**/*.zip
+      
+  - task: AzureFunctionApp@1
+    displayName: 'Deploy FuncApp'
+    inputs:
+      azureSubscription: 'Azure Resource Manager'
+      appName: $(funcName)
+      package: $(System.ArtifactsDirectory)/func/**/*.zip

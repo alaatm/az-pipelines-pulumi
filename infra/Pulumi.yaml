@@ -1,0 +1,3 @@
+name: az-pipelines
+runtime: dotnet
+description: A minimal C# Pulumi program using Azure Pipelines
