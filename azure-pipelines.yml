@@ -109,13 +109,13 @@ jobs:
   - task: AzureWebApp@1
     displayName: 'Deploy WebApp'
     inputs:
-      azureSubscription: 'Azure Resource Manager'
+      azureSubscription: 'VS-PRO-AZURE(509ae91c-1e41-451e-84fa-dd82d7696b67)'
       appName: $(appName)
       package: $(System.ArtifactsDirectory)/web/**/*.zip
       
   - task: AzureFunctionApp@1
     displayName: 'Deploy FuncApp'
     inputs:
-      azureSubscription: 'Azure Resource Manager'
+      azureSubscription: 'VS-PRO-AZURE(509ae91c-1e41-451e-84fa-dd82d7696b67)'
       appName: $(funcName)
       package: $(System.ArtifactsDirectory)/func/**/*.zip
