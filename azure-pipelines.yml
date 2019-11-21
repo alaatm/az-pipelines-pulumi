@@ -41,14 +41,14 @@ jobs:
       displayName: 'Restore Nugets'
       inputs:
         command: 'restore'
-        projects: '**/*.csproj'
+        projects: './AzPipelinesPulumi.sln'
 
     - task: DotNetCoreCLI@2
       displayName: 'Build Project'
       inputs:
         command: 'build'
-        projects: '**/*.csproj'
-        arguments: '--configuration $(BuildConfiguration)'
+        arguments: '--configuration $(BuildConfiguration) --no-restore'
+        projects: './AzPipelinesPulumi.sln'
 
 # Build and deploy on commit
 - job: build_and_deploy
@@ -66,35 +66,35 @@ jobs:
 #      performMultiLevelLookup: true
 
   - task: DotNetCoreCLI@2
-    displayName: 'Restore Nugets'
+    displayName: 'Restore Solution'
     inputs:
       command: 'restore'
-      projects: '**/*.csproj'
+      projects: './AzPipelinesPulumi.sln'
 
   - task: DotNetCoreCLI@2
-    displayName: 'Build Project'
+    displayName: 'Build Solution'
     inputs:
       command: 'build'
-      projects: '**/*.csproj'
-      arguments: '--configuration $(BuildConfiguration)'
+      arguments: '--configuration $(BuildConfiguration) --no-restore'
+      projects: './AzPipelinesPulumi.sln'
 
   - task: DotNetCoreCLI@2
     displayName: 'Publish WebApp'
     inputs:
-      publishWebProjects: False
+      publishWebProjects: false
+      zipAfterPublish: true
       command: publish
+      arguments: '--configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)/web'
       projects: './src/App/App.csproj'
-      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/web'
-      zipAfterPublish: True
 
   - task: DotNetCoreCLI@2
     displayName: 'Publish FuncApp'
     inputs:
-      publishWebProjects: False
+      publishWebProjects: false
+      zipAfterPublish: true
       command: publish
+      arguments: '--configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)/func'
       projects: './src/Funcs/Funcs.csproj'
-      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/func'
-      zipAfterPublish: True
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish WebApp Artifacts'
