@@ -26,6 +26,7 @@ jobs:
       cwd: 'infra/'
       stack: 'alaatm/az-pipelines/dev'
       args: '--yes'
+      
   - script: |
       echo "##vso[task.setvariable variable=appName;isOutput=true]$(pulumi stack output appName)"
       echo "##vso[task.setvariable variable=funcName;isOutput=true]$(pulumi stack output funcName)"
