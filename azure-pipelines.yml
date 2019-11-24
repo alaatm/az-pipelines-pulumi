@@ -76,7 +76,7 @@ jobs:
     displayName: 'Build Solution'
     inputs:
       command: 'build'
-      arguments: '--configuration $(BuildConfiguration) --no-restore'
+      arguments: '--no-restore -c $(BuildConfiguration)'
       projects: './AzPipelinesPulumi.sln'
 
   - task: DotNetCoreCLI@2
@@ -85,7 +85,7 @@ jobs:
       publishWebProjects: false
       zipAfterPublish: true
       command: publish
-      arguments: '--configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)/web'
+      arguments: '--no-build -c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)/web'
       projects: './src/App/App.csproj'
 
   - task: DotNetCoreCLI@2
@@ -94,7 +94,7 @@ jobs:
       publishWebProjects: false
       zipAfterPublish: true
       command: publish
-      arguments: '--configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)/func'
+      arguments: '--no-build -c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)/func'
       projects: './src/Funcs/Funcs.csproj'
 
   - task: PublishBuildArtifacts@1
